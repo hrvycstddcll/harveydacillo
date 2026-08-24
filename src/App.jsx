@@ -4,7 +4,7 @@ import Skills from './components/Skills';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import Simplified from './Simplified';
+import Simplified from './components/Simplified';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Moon, Sun } from 'lucide-react';
