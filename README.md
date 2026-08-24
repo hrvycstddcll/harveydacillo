@@ -1,5 +1,5 @@
+# ✦ Harvey Dacillo
 # ✦ Portfolio Website v1
-
 > **My first personal web portfolio — designed, developed, and animated from scratch.**
 
 A modern, responsive personal portfolio built to showcase my journey as a **BSIT student, web developer, and creative designer**.
