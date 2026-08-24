@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 
 // Register plugin synchronously to avoid initialization shifts
 gsap.registerPlugin(ScrollTrigger);
@@ -10,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 const projects = [
   {
     id: '01',
-    title: 'BCD Scholarship Profiling System',
+    title: 'BIO-CLICK-DONE',
     category: 'Full Stack Development',
     shortDescription: 'A Python and SQLite-powered information system built as an academic semestral project for digital scholar profiling.',
     fullDescription: 'Developed as a semestral project, the BCD Scholarship Profiling System replaces manual paper-based workflows with a centralized, local digital database. Built to streamline scholar management for administrators and applicants, it offers automated eligibility tracking, data verification, and secure record exports.',
@@ -20,7 +21,7 @@ const projects = [
       'Instant report generation and export capabilities',
       'Offline-first local database support via SQLite'
     ],
-    githubUrl: 'https://github.com',
+    githubUrl: 'https://github.com/hrvycstddcll/BCD-Scholar-Bio-Click-Done',
     liveUrl: null,
     image: 'https://raw.githubusercontent.com/hrvycstddcll/Portfolio-Website-v1/main/src/assets/p1s1.png',
     screenshots: [
@@ -69,6 +70,7 @@ export default function Projects() {
   const [isClient, setIsClient] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeImage, setActiveImage] = useState('');
+  const [imageZoomed, setImageZoomed] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -77,6 +79,7 @@ export default function Projects() {
   useEffect(() => {
     if (selectedProject) {
       setActiveImage(selectedProject.image);
+      setImageZoomed(false);
     }
   }, [selectedProject]);
 
@@ -198,8 +201,9 @@ export default function Projects() {
   };
 
   return (
-    <div
+    <section
       ref={scrollTrackRef}
+      id="projects"
       className="relative w-full bg-black text-white md:h-[250vh]"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
@@ -214,7 +218,11 @@ export default function Projects() {
             preload="auto"
             className="h-full w-full object-cover"
           />
+          {/* Left-to-Right Horizontal Gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-black pointer-events-none" />
+
+          {/* Top-to-Bottom Vertical Gradient Mask */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
         </div>
 
         {/* Horizontal Moving Content Container */}
@@ -223,8 +231,8 @@ export default function Projects() {
           className="relative z-10 flex flex-col md:flex-row h-full w-full md:w-max items-center gap-8 md:gap-12 px-4 sm:px-8 md:px-20 py-12 md:py-0 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none scrollbar-none"
         >
           {/* Intro Section */}
-          <div className="w-full md:w-[380px] flex-shrink-0 md:pr-4 snap-start">
-            <span className="text-xs font-bebas font-semibold tracking-[0.2em] text-amber-400 uppercase">
+          <div className="w-full md:w-[380px] flex-shrink-0 snap-start border-l-2 border-amber-400 pl-5 md:pr-4 sm:pl-8">
+            <span className="text-lg font-bebas font-semibold tracking-[0.2em] text-amber-400 uppercase">
               RECENT PROJECTS
             </span>
             <h2 className="mt-2 font-inter text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-neutral-300">
@@ -333,14 +341,24 @@ export default function Projects() {
                 </h2>
 
                 <div className="mt-4 md:mt-6">
-                  <div className="h-48 sm:h-60 md:h-80 w-full overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 aspect-[800/450]">
+                  <div className={`relative h-48 sm:h-60 md:h-80 w-full rounded-xl border border-neutral-800 bg-neutral-950 aspect-[800/450] ${imageZoomed ? 'overflow-auto' : 'overflow-hidden'}`}>
+                    <button
+                      type="button"
+                      onClick={() => setImageZoomed((zoomed) => !zoomed)}
+                      aria-label={imageZoomed ? 'Zoom out image' : 'Zoom in image'}
+                      title={imageZoomed ? 'Zoom out' : 'Zoom in'}
+                      className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-neutral-200 backdrop-blur-sm transition-colors hover:bg-amber-400 hover:text-black focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    >
+                      {imageZoomed ? <ZoomOut className="h-4 w-4" aria-hidden="true" /> : <ZoomIn className="h-4 w-4" aria-hidden="true" />}
+                    </button>
                     <img
                       src={activeImage}
                       alt={selectedProject.title}
                       width="800"
                       height="450"
                       decoding="async"
-                      className="h-full w-full object-cover transition-all duration-300"
+                      onClick={() => setImageZoomed((zoomed) => !zoomed)}
+                      className={`cursor-zoom-in transition-all duration-300 ${imageZoomed ? 'h-auto min-h-full w-[200%] max-w-none object-contain' : 'h-full w-full object-cover'}`}
                     />
                   </div>
 
@@ -349,7 +367,10 @@ export default function Projects() {
                       {selectedProject.screenshots.map((img, idx) => (
                         <button
                           key={idx}
-                          onClick={() => setActiveImage(img)}
+                          onClick={() => {
+                            setActiveImage(img);
+                            setImageZoomed(false);
+                          }}
                           className={`relative h-12 w-20 sm:h-16 sm:w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all aspect-[3/2] ${
                             activeImage === img ? 'border-amber-400 scale-105' : 'border-neutral-800 opacity-60 hover:opacity-100'
                           }`}
@@ -428,6 +449,6 @@ export default function Projects() {
             document.body
           )
         : null}
-    </div>
+    </section>
   );
 }

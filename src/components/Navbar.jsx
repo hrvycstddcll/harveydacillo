@@ -1,10 +1,8 @@
-import { Terminal } from "lucide-react";
 import { Menu } from "lucide-react";
-import { MoveUpRight  } from "lucide-react";
 import { X } from "lucide-react"
 import { gsap } from "gsap/gsap-core";
 import { useGSAP } from "@gsap/react";
-import { use, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useState } from "react";
 
 const navLinks = [
@@ -17,8 +15,57 @@ const navLinks = [
 export default function Navbar() {
   
   const [mobileIsOpen, setMobileIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState(() => window.location.hash || "#home");
   const navRefDesk = useRef(null);
   const navRefMob = useRef(null);
+  const desktopLinksRef = useRef(null);
+  const selectorRef = useRef(null);
+  const selectorMotion = useRef(null);
+
+  useEffect(() => {
+    const sections = navLinks
+      .map((link) => document.querySelector(link.href))
+      .filter(Boolean);
+
+    let frameId = 0;
+    const updateActiveSection = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+      const marker = window.innerHeight * 0.35;
+      const currentSection = sections.reduce((current, section) => (
+        section.getBoundingClientRect().top <= marker ? section : current
+      ), sections[0]);
+
+        if (currentSection) {
+          const nextSection = `#${currentSection.id}`;
+          setActiveSection((currentActive) => currentActive === nextSection ? currentActive : nextSection);
+        }
+      });
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
+    };
+  }, []);
+
+  const moveSelector = (linkElement) => {
+    if (!linkElement || !selectorRef.current || !desktopLinksRef.current) return;
+    const navBounds = desktopLinksRef.current.getBoundingClientRect();
+    const linkBounds = linkElement.getBoundingClientRect();
+    if (!selectorMotion.current) {
+      selectorMotion.current = {
+        x: gsap.quickTo(selectorRef.current, "x", { duration: 0.25, ease: "power3.out" }),
+        width: gsap.quickTo(selectorRef.current, "width", { duration: 0.25, ease: "power3.out" }),
+      };
+    }
+    selectorMotion.current.x(linkBounds.left - navBounds.left);
+    selectorMotion.current.width(linkBounds.width);
+  };
   useGSAP(() => {
     const tl = gsap.timeline(
       {
@@ -83,6 +130,22 @@ export default function Navbar() {
     }
   });
 
+  const selectorEnter = (e) => moveSelector(e.currentTarget);
+  const selectorLeave = () => {
+    const activeLink = desktopLinksRef.current?.querySelector(`[data-href="${activeSection}"]`);
+    moveSelector(activeLink);
+  };
+
+  const selectNavLink = (event, href) => {
+    setActiveSection(href);
+    moveSelector(event.currentTarget.closest(".desk-link"));
+  };
+
+  useEffect(() => {
+    const activeLink = desktopLinksRef.current?.querySelector(`[data-href="${activeSection}"]`);
+    moveSelector(activeLink);
+  }, [activeSection]);
+
   return(
     <>
 
@@ -93,14 +156,23 @@ export default function Navbar() {
             <div className="flex justify-center items-center">
               <img src="icon.svg" alt="logo" width="60" height="60" className="h-15 w-auto"/>
             </div>
-            <ul className="hidden md:flex justify-center items-center gap-12">
+            <ul ref={desktopLinksRef} onMouseLeave={selectorLeave} className="relative hidden md:flex justify-center items-center gap-12">
+              <span ref={selectorRef} className="pointer-events-none absolute -bottom-3 left-0 h-0.5 w-0 bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]" />
               {navLinks.map((link) => (
                 <li key={link.name} className="desk-link flex text-xs lg:text-lg tracking-tight space-x-2 select-none"
-                onMouseEnter={rollEnter}
                 onMouseLeave={rollLeave}
+                onMouseEnter={(event) => {
+                  rollEnter(event);
+                  selectorEnter(event);
+                }}
                 >
                   <span className="nav-id text-neutral-400 font-mono "> {link.id}</span>
-                  <a href={link.href} className="flex items-center">
+                  <a
+                    href={link.href}
+                    data-href={link.href}
+                    onClick={(event) => selectNavLink(event, link.href)}
+                    className={`flex items-center ${activeSection === link.href ? "text-amber-400" : ""}`}
+                  >
                     {link.name.split("").map((char, index) => (
                       <span key={index} className="relative overflow-hidden inline-block h-3 lg:h-4">
                         <span className="nav-links flex flex-col">
@@ -137,15 +209,16 @@ export default function Navbar() {
                 <ul className="flex flex-col min-h-[calc(100vh-20rem)]">
                   <div className="items-start space-y-4 sm:space-y-8">
                     {navLinks.map((link) => (
-                      <li key={link.name} className="mob-link border-b border-white/10 pb-4"
+                      <li key={link.name} className={`mob-link border-b border-white/10 border-l-2 pb-4 pl-4 transition-colors duration-300 ${activeSection === link.href ? "border-l-amber-400 bg-neutral-900/50" : "border-l-transparent"}`}
                       onClick={() => setMobileIsOpen(false)}
                       >
-                        <a href={link.href} className="flex items-baseline justify-between tracking-[0.15em] group group-hover:text-amber-400 transition-all">
-                          <span className="text-neutral-300 text-2xl font-inter font-semibold group-hover:text-amber-300 transition-all">
+                        <a href={link.href} className="flex items-center justify-between tracking-[0.15em] group transition-all">
+                          <span className={`text-2xl font-inter font-semibold transition-colors duration-300 ${activeSection === link.href ? "text-amber-300" : "text-neutral-300 group-hover:text-amber-300"}`}>
                             {link.name}  
                           </span>
-                          <span className="text-neutral-400 text-xs font-mono group-hover:text-[#ad7e23] transition-all">
-                            {link.id}
+                          <span className="flex items-center gap-3 text-xs font-mono text-neutral-400 transition-colors group-hover:text-[#ad7e23]">
+                            {activeSection === link.href && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />}
+                            <span>{link.id}</span>
                           </span>
                         </a>
                       </li>
