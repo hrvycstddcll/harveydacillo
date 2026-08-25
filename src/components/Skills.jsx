@@ -55,14 +55,14 @@ const certifications = [
   {
     title: "IT Specialist - Databases",
     issuer: "Certification Program",
-    year: "2024",
+    year: "2026",
     description: "Demonstrated a practical understanding of database design, query logic, and data organization for modern application systems.",
     image: new URL("../assets/it-specialist-1.png", import.meta.url).href,
   },
   {
     title: "CCNA: Introduction to Networks",
     issuer: "Networking Fundamentals",
-    year: "2024",
+    year: "2026",
     description: "Strengthened foundational networking knowledge, including connectivity, troubleshooting, and operational understanding of digital systems.",
     image: new URL("../assets/ccna-intro-to-net-1.png", import.meta.url).href,
   },
