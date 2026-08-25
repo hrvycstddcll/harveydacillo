@@ -19,6 +19,23 @@ const experience = {
   description: "Architecting custom web applications with React, Next.js, and modern backends, with a focus on performance, responsive interfaces, and maintainable code.",
 };
 
+const certifications = [
+  {
+    title: "IT Specialist - Databases",
+    subtitle: "Database fundamentals",
+    date: "2026",
+    image: new URL("../assets/it-specialist-1.png", import.meta.url).href,
+    summary: "Built a strong foundation in database structure, query logic, and data organization for practical application development.",
+  },
+  {
+    title: "CCNA: Introduction to Networks",
+    subtitle: "Networking essentials",
+    date: "2026",
+    image: new URL("../assets/ccna-intro-to-net-1.png", import.meta.url).href,
+    summary: "Developed a practical understanding of network fundamentals, connectivity, and troubleshooting across connected systems.",
+  },
+];
+
 const projects = [
   {
     number: "01",
@@ -40,13 +57,26 @@ const navItems = ["home", "skills", "projects", "contact"];
 
 export default function Simplified() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCertIndex, setActiveCertIndex] = useState(0);
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
 
   const closeMenu = () => setMenuOpen(false);
+
+  const nextCertification = () => {
+    setActiveCertIndex((current) => (current + 1) % certifications.length);
+  };
+
+  const previousCertification = () => {
+    setActiveCertIndex((current) => (current - 1 + certifications.length) % certifications.length);
+  };
+
   const menuClasses = [
     menuOpen ? "flex" : "hidden",
     "absolute left-0 right-0 top-[68px] flex-col gap-5 border-b border-black/15 bg-white px-5 py-6",
     "lg:static lg:flex lg:flex-row lg:gap-8 lg:border-0 lg:px-0 lg:py-0",
   ].join(" ");
+
+  const activeCertification = certifications[activeCertIndex];
 
   return (
     <main className="min-h-screen bg-white font-inter text-black selection:bg-black selection:text-white">
@@ -200,6 +230,116 @@ export default function Simplified() {
           </div>
         </div>
       </section>
+
+      <section className="mx-auto max-w-5xl px-5 py-12 sm:px-8 lg:px-14">
+        <div className="grid gap-8 sm:grid-cols-[150px_1fr]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-black/60">Certifications</p>
+
+          <div className="rounded-[28px] border border-black/10 bg-[#f3efe9] p-5 shadow-[0_22px_55px_rgba(15,23,42,0.08)] sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-black/55">
+                  Featured learning
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={previousCertification}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-black/15 bg-white text-sm text-black transition hover:border-black hover:bg-black hover:text-white"
+                  aria-label="Previous certificate"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  onClick={nextCertification}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-black/15 bg-white text-sm text-black transition hover:border-black hover:bg-black hover:text-white"
+                  aria-label="Next certificate"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-5 rounded-[22px] border border-black/10 bg-white p-4 shadow-[0_14px_28px_rgba(15,23,42,0.05)] sm:grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)] sm:p-5">
+              <button
+                type="button"
+                onClick={() => setSelectedCertificate(activeCertification)}
+                className="group overflow-hidden rounded-[18px] border border-black/10 bg-[linear-gradient(135deg,#f8f5f1_0%,#efe9df_100%)] p-3 text-left shadow-inner transition-transform duration-200 hover:scale-[1.01]"
+                aria-label={`View ${activeCertification.title} certificate in full size`}
+              >
+                <img
+                  src={activeCertification.image}
+                  alt={activeCertification.title}
+                  className="h-52 w-full rounded-[12px] object-contain bg-white p-2 shadow-[0_8px_20px_rgba(0,0,0,0.08)] transition duration-200 group-hover:scale-[1.02] sm:h-72"
+                />
+              </button>
+
+              <div className="flex flex-col justify-center">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-black/55">
+                    {activeCertification.subtitle}
+                  </p>
+                  <span className="rounded-full border border-black/15 bg-[#f7f3ee] px-2 py-1 font-mono text-[8px] uppercase tracking-[0.16em] text-black/60">
+                    {activeCertification.date}
+                  </span>
+                </div>
+
+                <h3 className="mt-3 font-serif text-2xl leading-tight tracking-[-0.04em] text-black sm:text-[1.8rem]">
+                  {activeCertification.title}
+                </h3>
+                <p className="mt-2 max-w-xl text-xs leading-relaxed text-black/70 sm:text-[13px]">
+                  {activeCertification.summary}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-2">
+              {certifications.map((item, index) => (
+                <button
+                  key={item.title}
+                  type="button"
+                  aria-label={`View certificate ${index + 1}`}
+                  onClick={() => setActiveCertIndex(index)}
+                  className={[
+                    "h-2.5 rounded-full transition-all",
+                    index === activeCertIndex ? "w-8 bg-black" : "w-2.5 bg-black/20 hover:bg-black/35",
+                  ].join(" ")}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {selectedCertificate && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedCertificate(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl rounded-[24px] border border-white/15 bg-white p-3 shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedCertificate(null)}
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black text-sm text-white"
+              aria-label="Close certificate view"
+            >
+              ×
+            </button>
+
+            <img
+              src={selectedCertificate.image}
+              alt={selectedCertificate.title}
+              className="max-h-[80vh] w-full rounded-[18px] object-contain bg-[#f7f3ee] p-2"
+            />
+          </div>
+        </div>
+      )}
 
       <section id="projects" className="mx-auto max-w-5xl px-5 py-14 sm:px-8 lg:px-14">
         <div className="grid gap-8 sm:grid-cols-[150px_1fr]">

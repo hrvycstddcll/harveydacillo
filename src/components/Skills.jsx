@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -51,8 +51,26 @@ const academics = [{
   description: "Focused on software engineering principles, database design, modern web architecture, and algorithms.",
 }];
 
+const certifications = [
+  {
+    title: "IT Specialist - Databases",
+    issuer: "Certification Program",
+    year: "2024",
+    description: "Demonstrated a practical understanding of database design, query logic, and data organization for modern application systems.",
+    image: new URL("../assets/it-specialist-1.png", import.meta.url).href,
+  },
+  {
+    title: "CCNA: Introduction to Networks",
+    issuer: "Networking Fundamentals",
+    year: "2024",
+    description: "Strengthened foundational networking knowledge, including connectivity, troubleshooting, and operational understanding of digital systems.",
+    image: new URL("../assets/ccna-intro-to-net-1.png", import.meta.url).href,
+  },
+];
+
 export default function Skills() {
   const skillsSection = useRef(null);
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
 
   useGSAP(() => {
     const media = gsap.matchMedia();
@@ -61,8 +79,8 @@ export default function Skills() {
       (context) => {
         if (context.conditions.reduceMotion) return undefined;
         const section = skillsSection.current;
-        const revealTargets = section.querySelectorAll(".skills-title, .skills-group, .stack-item, .skills-panel");
-        const interactiveTargets = section.querySelectorAll(".tech-card, .skills-panel-card");
+        const revealTargets = section.querySelectorAll(".skills-title, .skills-group, .stack-item, .skills-panel, .cert-card");
+        const interactiveTargets = section.querySelectorAll(".tech-card, .skills-panel-card, .cert-card");
         const handlers = [];
 
         gsap.from(revealTargets, {
@@ -75,6 +93,19 @@ export default function Skills() {
           scrollTrigger: {
             trigger: section,
             start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        });
+
+        gsap.from(".cert-image", {
+          scale: 0.92,
+          opacity: 0,
+          duration: 0.9,
+          stagger: 0.15,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".certificates-section",
+            start: "top 80%",
             toggleActions: "play none none reverse",
           },
         });
@@ -143,6 +174,108 @@ export default function Skills() {
             ))}
           </TimelinePanel>
         </div>
+
+        <div className="certificates-section flex flex-col gap-6">
+          <div className="skills-title flex items-center gap-3 border-l-2 border-amber-400 pl-5 sm:pl-8">
+            <Award className="h-5 w-5 text-amber-400" />
+            <h3 className="font-bebas text-3xl tracking-[0.14em] text-neutral-300 sm:text-5xl">CERTIFICATIONS</h3>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            {certifications.map((cert) => (
+              <article
+                key={cert.title}
+                className="cert-card cursor-pointer rounded-2xl border border-neutral-800 bg-neutral-950 p-5 shadow-[0_20px_45px_rgba(0,0,0,0.18)] transition-transform duration-300 hover:border-amber-400/60"
+                onClick={() => setSelectedCertificate(cert)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedCertificate(cert);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`View certificate: ${cert.title}`}
+              >
+                <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-3">
+                  <img
+                    src={cert.image}
+                    alt={cert.title}
+                    className="cert-image h-52 w-full rounded-lg object-contain bg-white p-3 sm:h-64"
+                  />
+                </div>
+
+                <div className="mt-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-500">
+                      {cert.issuer}
+                    </p>
+                    <h4 className="mt-2 font-bebas text-3xl tracking-wider text-neutral-200">
+                      {cert.title}
+                    </h4>
+                  </div>
+                  <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-amber-300">
+                    {cert.year}
+                  </span>
+                </div>
+
+                <p className="mt-4 font-inter text-sm leading-relaxed text-neutral-400">
+                  {cert.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        {selectedCertificate && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm"
+            onClick={() => setSelectedCertificate(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Certificate preview"
+          >
+            <div
+              className="relative w-full max-w-4xl rounded-3xl border border-neutral-800 bg-neutral-950 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.55)]"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedCertificate(null)}
+                className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900 text-xl text-neutral-200 transition hover:border-amber-400 hover:text-amber-300"
+                aria-label="Close certificate preview"
+              >
+                ×
+              </button>
+
+              <div className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+                <img
+                  src={selectedCertificate.image}
+                  alt={selectedCertificate.title}
+                  className="max-h-[72vh] w-full rounded-xl object-contain bg-white p-4"
+                />
+              </div>
+
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                    {selectedCertificate.issuer}
+                  </p>
+                  <h4 className="mt-2 font-bebas text-4xl tracking-wider text-neutral-200">
+                    {selectedCertificate.title}
+                  </h4>
+                </div>
+                <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">
+                  {selectedCertificate.year}
+                </span>
+              </div>
+
+              <p className="mt-4 font-inter text-sm leading-relaxed text-neutral-300">
+                {selectedCertificate.description}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
