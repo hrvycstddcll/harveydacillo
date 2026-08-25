@@ -4,7 +4,6 @@ import { useState } from "react";
 const skillGroups = [
   { label: "Frontend", items: ["React", "JavaScript", "HTML / CSS", "Tailwind CSS", "GSAP"] },
   { label: "Backend", items: ["Python", "MySQL", "C++", "Apache"] },
-  {}
 ];
 
 const education = {
