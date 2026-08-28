@@ -44,12 +44,20 @@ const experiences = [{
   ],
 }];
 
-const academics = [{
-  degree: "Bachelor of Science in Information Technology",
-  institution: "BATANGAS STATE UNIVERSITY - ARASOF",
-  period: "2021 — 2025",
-  description: "Focused on software engineering principles, database design, modern web architecture, and algorithms.",
-}];
+const academics = [
+  {
+    degree: "Bachelor of Science in Information Technology",
+    institution: "BATANGAS STATE UNIVERSITY - ARASOF",
+    period: "2024 — PRESENT",
+    description: "Focused on software engineering principles, database design, modern web architecture, and algorithms.",
+  },
+  {
+    degree: "Science, Technology, Engineering, and Mathematics",
+    institution: "CALATAGAN SENIOR HIGH SCHOOL",
+    period: "2022-2024",
+    description: "Focuses on developing critical thinking, problem-solving, and analytical skills through evidence-based learning."
+  }
+];
 
 const certifications = [
   {
@@ -282,5 +290,15 @@ export default function Skills() {
 }
 
 function TimelinePanel({ title, accent, icon: Icon, children }) {
-  return <div className="skills-panel flex flex-col gap-5"><div className="flex items-center gap-3 border-b border-neutral-800 pb-3"><Icon className="h-5 w-5 text-amber-400" /><h3 className="font-bebas text-xl tracking-[0.18em] text-neutral-300 sm:text-2xl">{title}</h3><span className="font-bebas text-xl tracking-[0.18em] text-amber-400 sm:text-2xl">{accent}</span></div>{children}</div>;
-}
+  return (
+    <div className="skills-panel flex flex-col gap-5">
+      <div className="border-l-2 border-amber-400 pl-5 sm:pl-8">
+        <div className="flex items-center gap-3 border-b border-neutral-800 pb-3 ">
+          <Icon className="h-5 w-5 text-amber-400" />
+          <h3 className="font-bebas text-3xl tracking-[0.14em] text-neutral-300 sm:text-5xl">{title}</h3>
+          <h3 className="font-bebas text-3xl tracking-[0.14em] text-amber-400 sm:text-5xl">{accent}</h3>
+        </div>
+      </div>{children}
+    </div>
+  )
+  }

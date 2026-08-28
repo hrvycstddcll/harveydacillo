@@ -6,11 +6,20 @@ const skillGroups = [
   { label: "Backend", items: ["Python", "MySQL", "C++", "Apache"] },
 ];
 
-const education = {
-  degree: "Bachelor of Science in Information Technology",
-  school: "Batangas State University - ARASOF",
-  period: "2021 — PRESENT",
-};
+const education = [
+  {
+    degree: "Bachelor of Science in Information Technology",
+    school: "Batangas State University - ARASOF",
+    period: "2024 — PRESENT",
+    description: "Focused on software engineering principles, database design, modern web architecture, and algorithms.",
+  },
+  {
+    degree: "Science, Technology, Engineering, and Mathematics",
+    institution: "CALATAGAN SENIOR HIGH SCHOOL",
+    period: "2022-2024",
+    description: "Focuses on developing critical thinking, problem-solving, and analytical skills through evidence-based learning."
+  }
+];
 
 const experience = {
   role: "Freelance Full Stack Developer",
@@ -184,7 +193,7 @@ export default function Simplified() {
 
                 <div className="flex flex-wrap gap-x-6 gap-y-1">
                   {group.items.map((skill) => (
-                    <span key={skill} className="font-serif text-xl text-black/75">
+                    <span key={skill} className="font-serif text-sm text-black/75 bg-[#f3efe9]">
                       {skill}
                     </span>
                   ))}
@@ -196,14 +205,23 @@ export default function Simplified() {
 
         <div className="grid gap-8 border-b border-black/20 py-10 sm:grid-cols-[150px_1fr]">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-black/60">Education</p>
+          <div className="space-y-8">
+            {education.map((item) => (
+              <article key={item.degree}>
+                <h2 className="font-serif text-2xl tracking-[-0.03em]">{item.degree}</h2>
 
-          <div>
-            <h2 className="font-serif text-2xl tracking-[-0.03em]">{education.degree}</h2>
+                <div className="mt-2 flex flex-wrap justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-black/55">
+                  <span>{item.school || item.institution}</span>
+                  <span>{item.period}</span>
+                </div>
 
-            <div className="mt-2 flex flex-wrap justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-black/55">
-              <span>{education.school}</span>
-              <span>{education.period}</span>
-            </div>
+                {item.description && (
+                  <p className="mt-4 max-w-2xl text-sm leading-relaxed text-black/65">
+                    {item.description}
+                  </p>
+                )}
+              </article>
+            ))}
           </div>
         </div>
       </section>
