@@ -1,244 +1,169 @@
-import { Menu } from "lucide-react";
-import { X } from "lucide-react"
-import { gsap } from "gsap/gsap-core";
-import { useGSAP } from "@gsap/react";
-import { useEffect, useRef } from "react";
-import { useState } from "react";
+﻿import { useState, useRef } from 'react';
+import { Menu, X } from 'lucide-react';
+import { navLinks } from '../../constants';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 
-const navLinks = [
-  { name: "HOME", href: "#home", id: "01"},
-  { name: "SKILLS", href: "#skills", id: "02"},
-  { name: "PROJECTS", href: "#projects", id: "03"},
-  { name: "CONTACT", href: "#contact", id: "04"},
-];
+gsap.registerPlugin(ScrollTrigger);
 
-export default function Navbar() {
-  
+export default function Navbar({ heroRef }) {
   const [mobileIsOpen, setMobileIsOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState(() => window.location.hash || "#home");
-  const navRefDesk = useRef(null);
-  const navRefMob = useRef(null);
-  const desktopLinksRef = useRef(null);
-  const selectorRef = useRef(null);
-  const selectorMotion = useRef(null);
+  const navRef = useRef(null);
 
-  useEffect(() => {
-    const sections = navLinks
-      .map((link) => document.querySelector(link.href))
-      .filter(Boolean);
+  useGSAP(
+    () => {
+      const nav = navRef.current;
+      const hero = heroRef?.current;
 
-    let frameId = 0;
-    const updateActiveSection = () => {
-      cancelAnimationFrame(frameId);
-      frameId = requestAnimationFrame(() => {
-      const marker = window.innerHeight * 0.35;
-      const currentSection = sections.reduce((current, section) => (
-        section.getBoundingClientRect().top <= marker ? section : current
-      ), sections[0]);
+      if (!nav || !hero) return;
 
-        if (currentSection) {
-          const nextSection = `#${currentSection.id}`;
-          setActiveSection((currentActive) => currentActive === nextSection ? currentActive : nextSection);
-        }
-      });
-    };
+      let tl = null;
 
-    updateActiveSection();
-    window.addEventListener("scroll", updateActiveSection, { passive: true });
-    window.addEventListener("resize", updateActiveSection);
-    return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener("scroll", updateActiveSection);
-      window.removeEventListener("resize", updateActiveSection);
-    };
-  }, []);
-
-  const moveSelector = (linkElement) => {
-    if (!linkElement || !selectorRef.current || !desktopLinksRef.current) return;
-    const navBounds = desktopLinksRef.current.getBoundingClientRect();
-    const linkBounds = linkElement.getBoundingClientRect();
-    if (!selectorMotion.current) {
-      selectorMotion.current = {
-        x: gsap.quickTo(selectorRef.current, "x", { duration: 0.25, ease: "power3.out" }),
-        width: gsap.quickTo(selectorRef.current, "width", { duration: 0.25, ease: "power3.out" }),
+      const resetNavState = () => {
+        gsap.set(nav, { clearProps: 'all' });
       };
-    }
-    selectorMotion.current.x(linkBounds.left - navBounds.left);
-    selectorMotion.current.width(linkBounds.width);
-  };
-  useGSAP(() => {
-    const tl = gsap.timeline(
-      {
-        defaults: {ease: "power4.out"}
 
-      }
-    );
-    tl.from(navRefDesk.current, {
-      opacity: 0, filter: "blur(20px)", y: -20,
-      duration: 1, ease: "power2.out"
-    })
-    .fromTo(".desk-link", 
-      {opacity: 0, y:-30},
-      {opacity: 1, y: 0, stagger:0.2, duration: 0.3, ease: "power3.out"}
-    );
+      const createAnimation = () => {
+        if (tl) {
+          tl.kill();
+          tl = null;
+        }
 
-  }, {scope: navRefDesk})
-  useGSAP(() => {
-    if (mobileIsOpen && navRefMob.current) {
-      const tl = gsap.timeline();
+        ScrollTrigger.getAll().forEach((st) => st.kill());
 
-      tl.fromTo(navRefMob.current, 
-        {opacity: 0},
-        {opacity: 1, duration: 0.1, ease: "power2.out", clearProps: "opacity"}
-      ).fromTo( ".mob-link", 
-        {opacity: 0, x:-30},
-        {opacity: 1, x: 0, stagger:0.2, duration: 0.3, ease: "power3.out"}
-      )
-    }
-  }, {scope: navRefMob, dependencies: [mobileIsOpen]});
+        resetNavState();
 
-  const {contextSafe: contextDesk} = useGSAP({scope: navRefDesk});
-  const rollEnter = contextDesk((e) => {
-    const li = e.currentTarget;
-    const rolls = li.querySelectorAll(".nav-links");
-    const id = li.querySelector(".nav-id");
+        tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: hero,
+            start: 'top top',
+            end: 'bottom top',
+            pin: false,
+            scrub: 0.4,
+            invalidateOnRefresh: true,
+          },
+        });
 
-    gsap.to(rolls, {
-      yPercent: -50, duration: 0.3, ease: "power2.inOut", stagger: 0.025,
-      overwrite: "auto",
-    })
-    if (id) {
-      gsap.to(id, {
-        color:"#ad7e23", xPercent:-10, duration: 0.25, overwrite: "auto",
-      })
-    }
-  });
-  
-  const rollLeave = contextDesk((e) => {
-    const li = e.currentTarget;
-    const rolls = li.querySelectorAll(".nav-links");
-    const id = li.querySelector(".nav-id");
+        const isMobile = window.innerWidth < 768;
 
-    gsap.to(rolls, {
-      yPercent: 0, duration: 0.5, ease: "power2.inOut", stagger: 0.025,
-      overwrite: "auto",
-    })
-    if(id) {
-      gsap.to(id, {
-        color:"#a3a3a3", xPercent:0, duration: 0.25, overwrite: "auto",
-      })
-    }
-  });
+        if (isMobile) {
+          tl.to(nav, { opacity: 0, duration: 0.15 });
+          tl.to(nav, {
+            y: () => -(window.innerHeight - nav.offsetHeight - 16),
+            maxWidth: '100%',
+            borderRadius: 0,
+            paddingLeft: '1.5rem',
+            paddingRight: '1.5rem',
+            paddingTop: '0.875rem',
+            paddingBottom: '0.875rem',
+            boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+            borderColor: 'rgba(0, 0, 0, 0.06)',
+            duration: 0.7,
+            ease: 'none',
+          }, 0.15);
+          tl.to(nav, { opacity: 1, duration: 0.15 }, 0.85);
+        } else {
+          tl.to(nav, {
+            y: () => -(window.innerHeight - nav.offsetHeight - 16),
+            maxWidth: '100%',
+            borderRadius: 0,
+            paddingLeft: '1.5rem',
+            paddingRight: '1.5rem',
+            paddingTop: '0.875rem',
+            paddingBottom: '0.875rem',
+            boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+            borderColor: 'rgba(0, 0, 0, 0.06)',
+            duration: 1,
+            ease: 'none',
+          });
+        }
 
-  const selectorEnter = (e) => moveSelector(e.currentTarget);
-  const selectorLeave = () => {
-    const activeLink = desktopLinksRef.current?.querySelector(`[data-href="${activeSection}"]`);
-    moveSelector(activeLink);
-  };
+        ScrollTrigger.refresh();
+      };
 
-  const selectNavLink = (event, href) => {
-    setActiveSection(href);
-    moveSelector(event.currentTarget.closest(".desk-link"));
-  };
+      createAnimation();
 
-  useEffect(() => {
-    const activeLink = desktopLinksRef.current?.querySelector(`[data-href="${activeSection}"]`);
-    moveSelector(activeLink);
-  }, [activeSection]);
+      let resizeTimer = null;
+      const onResize = () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          if (window.innerWidth >= 768) {
+            setMobileIsOpen(false);
+          }
+          createAnimation();
+        }, 300);
+      };
 
-  return(
+      window.addEventListener('resize', onResize);
+
+      return () => {
+        clearTimeout(resizeTimer);
+        window.removeEventListener('resize', onResize);
+        if (tl) tl.kill();
+        ScrollTrigger.getAll().forEach((st) => st.kill());
+        gsap.set(nav, { clearProps: 'all' });
+      };
+    },
+    { scope: navRef, dependencies: [heroRef] }
+  );
+
+  return (
     <>
+      <nav
+        ref={navRef}
+        className="navbar-shell fixed bottom-4 left-1/2 z-[1000] w-[calc(100%-1rem)] -translate-x-1/2 border border-black/15 bg-white/80 px-3 py-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl sm:bottom-5 sm:w-[calc(100%-2.5rem)] sm:max-w-5xl sm:px-4 sm:py-3"
+      >
+        <div className="nav-inner flex items-center justify-between gap-2 sm:gap-4">
+          <ul className="hidden items-center gap-5 whitespace-nowrap md:flex lg:gap-8">
+            {navLinks.map((link) => (
+              <li key={link.id}>
+                <a href={`#${link.id}`} className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#0f0f0f]">
+                  {link.title}
+                </a>
+              </li>
+            ))}
+          </ul>
 
-        <nav ref={navRefDesk} className="fixed top-0 left-0 w-full z-50 border-b border-white/10 backdrop-blur-md bg-black/20">
-          
-          <div className="flex justify-between items-center px-8">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3 md:ml-0">
+            <span className="commission-text hidden font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-[#0f0f0f] lg:inline-block">
+              AVAILABLE FOR COMMISSIONS
+            </span>
 
-            <div className="flex justify-center items-center">
-              <img src="icon.svg" alt="logo" width="60" height="60" className="h-15 w-auto"/>
-            </div>
-            <ul ref={desktopLinksRef} onMouseLeave={selectorLeave} className="relative hidden md:flex justify-center items-center gap-12">
-              <span ref={selectorRef} className="pointer-events-none absolute -bottom-3 left-0 h-0.5 w-0 bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]" />
-              {navLinks.map((link) => (
-                <li key={link.name} className="desk-link flex text-xs lg:text-lg tracking-tight space-x-2 select-none"
-                onMouseLeave={rollLeave}
-                onMouseEnter={(event) => {
-                  rollEnter(event);
-                  selectorEnter(event);
-                }}
-                >
-                  <span className="nav-id text-neutral-400 font-mono "> {link.id}</span>
-                  <a
-                    href={link.href}
-                    data-href={link.href}
-                    onClick={(event) => selectNavLink(event, link.href)}
-                    className={`flex items-center ${activeSection === link.href ? "text-amber-400" : ""}`}
-                  >
-                    {link.name.split("").map((char, index) => (
-                      <span key={index} className="relative overflow-hidden inline-block h-3 lg:h-4">
-                        <span className="nav-links flex flex-col">
-                          <span className="text-neutral-300 font-inter leading-none">
-                            {char === " " ? "\u00A0" : char}
-                          </span>
-                          <span className="text-amber-400 font-inter font-semibold leading-none">
-                            {char === " " ? "\u00A0" : char}
-                          </span>
-                        </span>
-                      </span>
-                    ))}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <button
+              onClick={() => setMobileIsOpen((prev) => !prev)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm sm:h-10 sm:w-10 md:hidden"
+              aria-label="Toggle menu"
+            >
+              {mobileIsOpen ? <X className="h-4 w-4 sm:h-5 sm:w-5" /> : <Menu className="h-4 w-4 sm:h-5 sm:w-5" />}
+            </button>
+          </div>
+        </div>
+      </nav>
 
-            <div className="flex justify-cente items-center gap-15">
-              
-              <button onClick={() => setMobileIsOpen((prev) => !prev)} className="h-5 w-5 md:hidden cursor-pointer hover:-rotate-360 transition-all duration-700">
-                {mobileIsOpen 
-                ? <X className="text-amber-400"/>
-                : <Menu className="text-neutral-300"/>
-                }
-              </button>
-            </div>
+      {mobileIsOpen && (
+        <nav className="fixed inset-0 z-[1001] bg-[#f5f5f3]/95 px-5 pt-24 backdrop-blur-md sm:px-6 md:hidden">
+          <button
+            onClick={() => setMobileIsOpen(false)}
+            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm sm:right-6"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <div className="flex flex-col gap-4 sm:gap-5">
+            {navLinks.map((link) => (
+              <a
+                key={link.id}
+                href={`#${link.id}`}
+                onClick={() => setMobileIsOpen(false)}
+                className="mobile-menu-link border-b border-black/10 pb-3 font-mono text-lg uppercase tracking-[0.2em] text-black sm:text-xl"
+              >
+                {link.title}
+              </a>
+            ))}
           </div>
         </nav>
-
-        {mobileIsOpen && 
-          (
-            <nav ref={navRefMob} className="fixed md:hidden inset-0 z-40 border-b border-white/10 backdrop-blur-md bg-black/90 p-8 pt-28 overflow-y-auto">
-              <div className="flex flex-col ">
-                <ul className="flex flex-col min-h-[calc(100vh-20rem)]">
-                  <div className="items-start space-y-4 sm:space-y-8">
-                    {navLinks.map((link) => (
-                      <li key={link.name} className={`mob-link border-b border-white/10 border-l-2 pb-4 pl-4 transition-colors duration-300 ${activeSection === link.href ? "border-l-amber-400 bg-neutral-900/50" : "border-l-transparent"}`}
-                      onClick={() => setMobileIsOpen(false)}
-                      >
-                        <a href={link.href} className="flex items-center justify-between tracking-[0.15em] group transition-all">
-                          <span className={`text-2xl font-inter font-semibold transition-colors duration-300 ${activeSection === link.href ? "text-amber-300" : "text-neutral-300 group-hover:text-amber-300"}`}>
-                            {link.name}  
-                          </span>
-                          <span className="flex items-center gap-3 text-xs font-mono text-neutral-400 transition-colors group-hover:text-[#ad7e23]">
-                            {activeSection === link.href && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />}
-                            <span>{link.id}</span>
-                          </span>
-                        </a>
-                      </li>
-                    ))}
-                  </div>
-                </ul>
-                <div className="mob-link flex flex-col pt-8 items-center">
-                  <span className="font-inter text-neutral-300 text-xs tracking-[0.2em]">
-                    AVAILABLE FOR COMISSIONS
-                  </span>
-                  <span className="font-mono text-xs text-amber-400">
-                    2026
-                  </span>
-                </div>
-              </div>
-            </nav>
-          )
-        }
+      )}
     </>
-
-    
-  )  
+  );
 }
