@@ -76,7 +76,6 @@ export default function Contact() {
       let headTl = null;
       let driftTl = null;
       let ruleTl = null;
-      let resizeTimer = null;
       let cancelled = false;
 
       const buildHeadline = () => {
@@ -197,14 +196,7 @@ export default function Contact() {
 
 
 
-      const settle = () => {
-        gsap.set('[data-rule], [data-row], [data-sticky] > *', {
-          clearProps: 'opacity,y,transform,scaleX',
-        });
-      };
-
-      const onResize = () => {
-        clearTimeout(resizeTimer);
+      const teardown = () => {
         headTl?.scrollTrigger?.kill();
         headTl?.kill();
         driftTl?.scrollTrigger?.kill();
@@ -213,16 +205,26 @@ export default function Contact() {
         introTl?.kill();
         ruleTl?.scrollTrigger?.kill();
         ruleTl?.kill();
+        headTl = null;
+        driftTl = null;
+        introTl = null;
+        ruleTl = null;
         split?.revert();
         split = null;
-        if (headlineRef.current) {
-          gsap.set(headlineRef.current, { clearProps: 'yPercent,opacity,transform' });
+        if (labelRef.current) {
+          labelRef.current.textContent = contact.availability;
         }
+        gsap.set(
+          '[data-headline], [data-rule], [data-row], [data-sticky] > *, [data-rule-fill]',
+          { clearProps: 'all' }
+        );
         enteredRef.current = true;
-        buildHeadline();
-        buildIntro();
-        buildRule();
-        settle();
+      };
+
+      const onResize = () => {
+        window.removeEventListener('resize', onResize);
+        cancelled = true;
+        teardown();
         ScrollTrigger.refresh();
       };
 
@@ -241,18 +243,8 @@ export default function Contact() {
 
       return () => {
         cancelled = true;
-        clearTimeout(resizeTimer);
         window.removeEventListener('resize', onResize);
-        introTl?.scrollTrigger?.kill();
-        introTl?.kill();
-        headTl?.scrollTrigger?.kill();
-        headTl?.kill();
-        driftTl?.scrollTrigger?.kill();
-        driftTl?.kill();
-        ruleTl?.scrollTrigger?.kill();
-        ruleTl?.kill();
-        split?.revert();
-        ScrollTrigger.getAll().forEach((st) => st.kill());
+        teardown();
       };
     },
     { scope: sectionRef }

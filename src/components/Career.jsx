@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeft } from 'lucide-react';
 import Folder from './Folder';
 import DraggableWindow from './DraggableWindow';
@@ -27,21 +28,23 @@ function ImagePreview({ src, alt, className }) {
       >
         <img src={src} alt={alt} className={className} />
       </button>
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-[70] flex cursor-zoom-out items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${alt} image preview`}
-        >
-          <img
-            src={src}
-            alt={alt}
-            className="h-full w-full max-h-[90vh] max-w-[95vw] rounded-lg object-contain shadow-2xl"
-          />
-        </div>
-      )}
+      {isOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[1100] flex cursor-zoom-out items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${alt} image preview`}
+          >
+            <img
+              src={src}
+              alt={alt}
+              className="h-full w-full max-h-[90vh] max-w-[95vw] rounded-lg object-contain shadow-2xl"
+            />
+          </div>,
+          document.body
+        )}
     </>
   );
 }
@@ -175,18 +178,23 @@ function AcademicsModal({ institution, onClose, bringToFront, containerRef }) {
             >
               <img src={institution.image} alt={institution.institution} className="h-full w-full object-contain" />
             </button>
-            {imageOpen && (
-              <div
-                className="fixed inset-0 z-[70] flex cursor-zoom-out items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
-                onClick={() => setImageOpen(false)}
-              >
-                <img
-                  src={institution.image}
-                  alt={institution.institution}
-                  className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
-                />
-              </div>
-            )}
+            {imageOpen &&
+              createPortal(
+                <div
+                  className="fixed inset-0 z-[1100] flex cursor-zoom-out items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
+                  onClick={() => setImageOpen(false)}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={`${institution.institution} image preview`}
+                >
+                  <img
+                    src={institution.image}
+                    alt={institution.institution}
+                    className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
+                  />
+                </div>,
+                document.body
+              )}
           </>
         )}
         <div>
@@ -351,18 +359,23 @@ function CertificationModal({ cert, onClose, bringToFront, containerRef }) {
             >
               <img src={cert.image} alt={cert.title} className="h-full w-full object-contain" />
             </button>
-            {imageOpen && (
-              <div
-                className="fixed inset-0 z-[70] flex cursor-zoom-out items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
-                onClick={() => setImageOpen(false)}
-              >
-                <img
-                  src={cert.image}
-                  alt={cert.title}
-                  className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
-                />
-              </div>
-            )}
+            {imageOpen &&
+              createPortal(
+                <div
+                  className="fixed inset-0 z-[1100] flex cursor-zoom-out items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
+                  onClick={() => setImageOpen(false)}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={`${cert.title} image preview`}
+                >
+                  <img
+                    src={cert.image}
+                    alt={cert.title}
+                    className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
+                  />
+                </div>,
+                document.body
+              )}
           </>
         )}
         <div>

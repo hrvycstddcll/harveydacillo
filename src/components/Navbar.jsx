@@ -26,11 +26,10 @@ export default function Navbar({ heroRef }) {
 
       const createAnimation = () => {
         if (tl) {
+          tl.scrollTrigger?.kill();
           tl.kill();
           tl = null;
         }
-
-        ScrollTrigger.getAll().forEach((st) => st.kill());
 
         resetNavState();
 
@@ -100,8 +99,8 @@ export default function Navbar({ heroRef }) {
       return () => {
         clearTimeout(resizeTimer);
         window.removeEventListener('resize', onResize);
-        if (tl) tl.kill();
-        ScrollTrigger.getAll().forEach((st) => st.kill());
+        tl?.scrollTrigger?.kill();
+        tl?.kill();
         gsap.set(nav, { clearProps: 'all' });
       };
     },
