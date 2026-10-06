@@ -53,7 +53,6 @@ export default function Contact() {
   const sectionRef = useRef(null);
   const headlineRef = useRef(null);
   const labelRef = useRef(null);
-  const statementRef = useRef(null);
   const enteredRef = useRef(false);
   const copyTimer = useRef(null);
   const [copied, setCopied] = useState(false);
@@ -70,23 +69,18 @@ export default function Contact() {
       if (prefersReducedMotion.current) return;
 
       const root = sectionRef.current;
-      const statementBlock = root?.querySelector('[data-statement-block]');
+      const sticky = root?.querySelector('[data-sticky]');
 
       let split = null;
       let introTl = null;
       let headTl = null;
       let driftTl = null;
       let ruleTl = null;
-      let statementSplit = null;
-      let statementTl = null;
-      let statementIntroTl = null;
       let cancelled = false;
 
       const buildHeadline = () => {
         headTl?.scrollTrigger?.kill();
         headTl?.kill();
-        driftTl?.scrollTrigger?.kill();
-        driftTl?.kill();
         split?.revert();
         split = null;
 
@@ -102,8 +96,8 @@ export default function Contact() {
         headTl = gsap.timeline({
           scrollTrigger: {
             trigger: headlineRef.current,
-            start: 'top 90%',
-            end: 'bottom 65%',
+            start: 'top 88%',
+            end: 'bottom 58%',
             scrub: 0.55,
             invalidateOnRefresh: true,
           },
@@ -117,13 +111,13 @@ export default function Contact() {
         });
 
         driftTl = gsap.to(headlineRef.current, {
-          yPercent: -16,
-          opacity: 0,
+          yPercent: -10,
+          opacity: 0.55,
           ease: 'none',
           scrollTrigger: {
             trigger: headlineRef.current,
-            start: 'top 38%',
-            end: 'top 10%',
+            start: 'top 55%',
+            end: 'bottom top',
             scrub: 0.5,
             invalidateOnRefresh: true,
           },
@@ -158,7 +152,8 @@ export default function Contact() {
             '[data-row]',
             { y: 28, opacity: 0, duration: 0.85, stagger: 0.075 },
             '-=0.75'
-          );
+          )
+          .from('[data-sticky] > *', { y: 22, opacity: 0, duration: 0.7, stagger: 0.1 }, '-=0.6');
 
         if (labelRef.current) {
           introTl.to(
@@ -180,7 +175,7 @@ export default function Contact() {
         ruleTl?.scrollTrigger?.kill();
         ruleTl?.kill();
 
-        if (!statementBlock) return;
+        if (!sticky) return;
 
         ruleTl = gsap.fromTo(
           '[data-rule-fill]',
@@ -189,7 +184,7 @@ export default function Contact() {
             scaleX: 1,
             ease: 'none',
             scrollTrigger: {
-              trigger: statementBlock,
+              trigger: sticky,
               start: 'top 82%',
               end: 'bottom 55%',
               scrub: 0.4,
@@ -201,55 +196,6 @@ export default function Contact() {
 
 
 
-      const buildStatement = () => {
-        statementTl?.scrollTrigger?.kill();
-        statementTl?.kill();
-        statementSplit?.revert();
-        statementSplit = null;
-
-        if (!statementRef.current) return;
-
-        statementSplit = SplitText.create(statementRef.current, { type: 'words' });
-        statementTl = gsap.fromTo(
-          statementSplit.words,
-          { color: 'rgba(255,255,255,0.15)' },
-          {
-            color: '#ffffff',
-            stagger: 0.1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: statementRef.current,
-              start: 'top 70%',
-              end: 'bottom center',
-              scrub: true,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      };
-
-const buildStatementIntro = () => {
-        statementIntroTl?.scrollTrigger?.kill();
-        statementIntroTl?.kill();
-
-        if (!statementBlock) return;
-
-        statementIntroTl = gsap.from('[data-statement-block] > *', {
-          y: 26,
-          opacity: 0,
-          duration: 0.9,
-          stagger: 0.08,
-          ease: editorialEase,
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: statementBlock,
-            start: 'top 90%',
-            toggleActions: 'play none none reverse',
-            invalidateOnRefresh: true,
-          },
-        });
-      };
-
       const teardown = () => {
         headTl?.scrollTrigger?.kill();
         headTl?.kill();
@@ -259,25 +205,17 @@ const buildStatementIntro = () => {
         introTl?.kill();
         ruleTl?.scrollTrigger?.kill();
         ruleTl?.kill();
-        statementTl?.scrollTrigger?.kill();
-        statementTl?.kill();
-        statementIntroTl?.scrollTrigger?.kill();
-        statementIntroTl?.kill();
         headTl = null;
         driftTl = null;
         introTl = null;
         ruleTl = null;
-        statementTl = null;
-        statementIntroTl = null;
         split?.revert();
         split = null;
-        statementSplit?.revert();
-        statementSplit = null;
         if (labelRef.current) {
           labelRef.current.textContent = contact.availability;
         }
         gsap.set(
-          '[data-headline], [data-rule], [data-row], [data-statement-block] > *, [data-rule-fill]',
+          '[data-headline], [data-rule], [data-row], [data-sticky] > *, [data-rule-fill]',
           { clearProps: 'all' }
         );
         enteredRef.current = true;
@@ -293,15 +231,11 @@ const buildStatementIntro = () => {
       buildHeadline();
       buildIntro();
       buildRule();
-      buildStatement();
-      buildStatementIntro();
 
       const fontsReady = document.fonts?.ready ?? Promise.resolve();
       fontsReady.then(() => {
         if (cancelled) return;
         buildHeadline();
-        buildStatement();
-        buildStatementIntro();
         ScrollTrigger.refresh();
       });
 
@@ -367,101 +301,99 @@ const buildStatementIntro = () => {
         <h2
           ref={headlineRef}
           data-headline
-          className="mt-10 text-center font-bebas text-[clamp(3.25rem,14vw,11rem)] leading-[0.9] tracking-[-0.02em] text-white md:mt-16"
+          className="mt-10 font-bebas text-[clamp(3.25rem,14vw,12rem)] leading-[0.95] tracking-[-0.02em] text-white md:mt-16"
         >
           <span className="block">Let&apos;s Build</span>
-          <span className="block text-[1.02em] text-white/25">Something</span>
-          <span className="block font-playfair text-[0.66em] italic leading-[0.9] tracking-[-0.01em] text-white/85">
+          <span className="block text-white/25">Something</span>
+          <span className="block font-playfair text-[0.52em] italic leading-[0.95] tracking-[-0.04em] text-white/80 md:pl-[0.6em]">
             real.
           </span>
         </h2>
 
-        {/* Statement + CTA */}
-        <div data-statement-block className="mx-auto mt-24 max-w-4xl text-center md:mt-36 lg:mt-44">
-          <p
-            ref={statementRef}
-            className="mx-auto max-w-3xl font-playfair text-[clamp(1.9rem,4.8vw,4rem)] italic leading-[1.15] text-white/80"
-          >
-            Have an idea, a project, or a good challenge? Send it over — every message gets read,
-            and I reply within a day or two.
-          </p>
+        {/* Statement + directory */}
+        <div className="mt-14 grid gap-12 border-t border-white/10 pt-12 md:mt-20 md:grid-cols-[0.82fr_1.18fr] md:gap-20">
+          <div data-sticky className=" md:sticky md:top-24 md:self-start">
+            <p className="max-w-sm font-inter text-[clamp(1rem,1.5vw,1.25rem)] font-light leading-[1.6] text-white/80">
+              Have an idea, a project, or a good challenge? Send it over — every message gets read,
+              and I reply within a day or two.
+            </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <a href={mailtoHref} rel="noopener noreferrer" aria-label="Start a project conversation by email" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-black transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary">
-              Start a Conversation
-              <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-            <button
-              type="button"
-              onClick={copyEmail}
-              aria-live="polite"
-              aria-label={copied ? 'Email copied to clipboard' : 'Copy email address to clipboard'}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/70 transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
-            >
-              {copied ? (
-                <Check className="h-3.5 w-3.5" aria-hidden="true" />
-              ) : (
-                <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-              )}
-              <span>{copied ? 'Email Copied' : 'Copy Email'}</span>
-            </button>
-          </div>
-
-          <div className="mx-auto mt-12 h-px max-w-3xl bg-white/10">
-            <div data-rule-fill className="h-px w-full origin-left scale-x-0 bg-white" />
-          </div>
-        </div>
-
-        {/* Links directory */}
-        <div className="mx-auto mt-16 max-w-3xl border-t border-white/10 pt-12 md:mt-24">
-          {contact.links.map(({ label, value, href, icon, external }, i) => {
-            const Icon = linkIcons[icon];
-
-            const content = (
-              <>
-                <span
-                  className="pointer-events-none absolute inset-0 origin-bottom scale-y-0 bg-white transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100 group-focus-visible:scale-y-100"
-                  aria-hidden="true"
-                />
-                <span className="relative flex items-baseline gap-4 px-1 py-6 sm:gap-6 sm:py-8 lg:gap-8">
-                  <span className="font-mono text-[10px] tracking-[0.2em] text-white/60 transition-colors duration-500 group-hover:text-black/40 group-focus-visible:text-black/40">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.25em] text-white/60 transition-colors duration-500 group-hover:text-black/50 group-focus-visible:text-black/50 sm:w-20">
-                    {label}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate font-inter text-[clamp(0.95rem,2.2vw,1.375rem)] text-white/90 transition-colors duration-500 group-hover:text-black group-focus-visible:text-black">
-                    {value}
-                  </span>
-                  <Icon className="h-4 w-4 shrink-0 self-center text-white/40 transition-colors duration-500 group-hover:text-black group-focus-visible:text-black sm:h-5 sm:w-5" aria-hidden="true" />
-                </span>
-              </>
-            );
-
-            const shell =
-              'group relative block border-b border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary';
-
-            if (!href) {
-              return (
-                <div key={`${label}-${i}`} className={shell} data-row>
-                  {content}
-                </div>
-              );
-            }
-
-            return (
-              <a
-                key={`${label}-${i}`}
-                href={href}
-                target={external ? '_blank' : undefined}
-                rel={external ? 'noopener noreferrer' : undefined}
-                className={`${shell} transition-colors duration-500 hover:border-white/40`}
-                data-row
-              >
-                {content}
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <a href={mailtoHref} rel="noopener noreferrer" aria-label="Start a project conversation by email" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-black transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary">
+                Start a Conversation
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
-            );
-          })}
+              <button
+                type="button"
+                onClick={copyEmail}
+                aria-live="polite"
+                aria-label={copied ? 'Email copied to clipboard' : 'Copy email address to clipboard'}
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/70 transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+              >
+                {copied ? (
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                <span>{copied ? 'Email Copied' : 'Copy Email'}</span>
+              </button>
+            </div>
+
+            <div className="mt-10 h-px w-full bg-white/10">
+              <div data-rule-fill className="h-px w-full origin-left scale-x-0 bg-white" />
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            {contact.links.map(({ label, value, href, icon, external }, i) => {
+              const Icon = linkIcons[icon];
+
+              const content = (
+                <>
+                  <span
+                    className="pointer-events-none absolute inset-0 origin-bottom scale-y-0 bg-white transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100 group-focus-visible:scale-y-100"
+                    aria-hidden="true"
+                  />
+                  <span className="relative flex items-baseline gap-4 px-1 py-6 sm:gap-6 sm:py-8 lg:gap-8">
+                    <span className="font-mono text-[10px] tracking-[0.2em] text-white/60 transition-colors duration-500 group-hover:text-black/40 group-focus-visible:text-black/40">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.25em] text-white/60 transition-colors duration-500 group-hover:text-black/50 group-focus-visible:text-black/50 sm:w-20">
+                      {label}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate font-inter text-[clamp(0.95rem,2.2vw,1.375rem)] text-white/90 transition-colors duration-500 group-hover:text-black group-focus-visible:text-black">
+                      {value}
+                    </span>
+                    <Icon className="h-4 w-4 shrink-0 self-center text-white/40 transition-colors duration-500 group-hover:text-black group-focus-visible:text-black sm:h-5 sm:w-5" aria-hidden="true" />
+                  </span>
+                </>
+              );
+
+              const shell =
+                'group relative block border-b border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary';
+
+              if (!href) {
+                return (
+                  <div key={`${label}-${i}`} className={shell} data-row>
+                    {content}
+                  </div>
+                );
+              }
+
+              return (
+                <a
+                  key={`${label}-${i}`}
+                  href={href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noopener noreferrer' : undefined}
+                  className={`${shell} transition-colors duration-500 hover:border-white/40`}
+                  data-row
+                >
+                  {content}
+                </a>
+              );
+            })}
+          </div>
         </div>
 
 
