@@ -205,15 +205,25 @@ export default function Contact() {
 
       const onResize = () => {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          buildHeadline();
-          if (enteredRef.current) {
-            settle();
-          } else {
-            buildIntro();
-          }
-          ScrollTrigger.refresh();
-        }, 280);
+        headTl?.scrollTrigger?.kill();
+        headTl?.kill();
+        driftTl?.scrollTrigger?.kill();
+        driftTl?.kill();
+        introTl?.scrollTrigger?.kill();
+        introTl?.kill();
+        ruleTl?.scrollTrigger?.kill();
+        ruleTl?.kill();
+        split?.revert();
+        split = null;
+        if (headlineRef.current) {
+          gsap.set(headlineRef.current, { clearProps: 'yPercent,opacity,transform' });
+        }
+        enteredRef.current = true;
+        buildHeadline();
+        buildIntro();
+        buildRule();
+        settle();
+        ScrollTrigger.refresh();
       };
 
       buildHeadline();

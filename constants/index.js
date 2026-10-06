@@ -42,7 +42,7 @@ export const metrics = [
 ]
 
 export const quote = {
-    text: "\u201CVibecoded entirely using free AI, with like, maybe a major code fix or two along the way. Watching an idea come to life through conversation is incredible. If I can build this, you can too\u2014take the tools and start creating.\u201D",
+    text: "\u201CDedicate your hearts, and the output will take care of itself. Stumbling is simply evidence of progress. Life is a constant journey of upgrading your mind—stay curious, keep pushing ahead, and honor how far you've come from where you began. Shinzou wo Sasageyo!\u201D",
     name: "HARVEY DACILLO",
     role: "Aspiring Software Engineer",
 }
