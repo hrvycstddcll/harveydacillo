@@ -1,1 +1,0 @@
-const fs=require('fs'); const p='C:/Users/Acer/OneDrive/Desktop/Portfolio-Website-v1/src/components/Contact.jsx'; let s=fs.readFileSync(p,'utf8'); if(!s.includes('href={mailtoHref}')){ s=s.replace(/<a\s+rel=/,'<a href={mailtoHref} rel='); } fs.writeFileSync(p,s);
